@@ -1,6 +1,5 @@
 import shutil
 import os
-import sys
 
 from pathlib import Path
 from textnode import TextNode, TextType
@@ -43,7 +42,7 @@ def copy_directory(directory_src, directory_dst):
             print(f"{item} is dir, recursing...")
             copy_directory(src_item, dst_item)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}...")
     with open(from_path, 'r') as md_file:
         markdown = md_file.read()
@@ -53,17 +52,19 @@ def generate_page(from_path, template_path, dest_path):
     page_title = extract_title(markdown)
     template = template.replace("{{ Title }}", page_title)
     template = template.replace("{{ Content }}", html_str)
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
     with open(dest_path, "w") as html_file:
         html_file.write(template)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     for item in os.listdir(dir_path_content):
         print(f"Content item: {item}")
         src_item = os.path.join(dir_path_content, item)
         dst_item = os.path.join(dest_dir_path, item)
         if os.path.isfile(src_item):
             dest_path = Path(dst_item).with_suffix(".html")
-            generate_page(src_item, template_path, dest_path)
+            generate_page(src_item, template_path, dest_path, basepath)
         elif os.path.isdir(src_item):
             copy_directory(src_item, dst_item)
-            generate_pages_recursive(src_item, template_path, dst_item)
+            generate_pages_recursive(src_item, template_path, dst_item, basepath)

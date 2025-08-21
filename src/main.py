@@ -1,3 +1,5 @@
+import sys
+
 from generate_pages import (
     prepare_directory,
     copy_directory,
@@ -5,8 +7,12 @@ from generate_pages import (
 )
 
 def main():
-    prepare_directory("public")
-    copy_directory("static", "public")
-    generate_pages_recursive("content/", "template.html", "public/")
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+    prepare_directory("docs")
+    copy_directory("static", "docs")
+    generate_pages_recursive("content/", "template.html", "docs/", basepath)
 
 main()
